@@ -5,11 +5,14 @@
  */
 package app.entity.service;
 
+import app.entity.Categoria;
 import app.entity.Categoriaserie;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -86,6 +89,24 @@ public class CategoriaserieFacadeREST extends AbstractFacade<Categoriaserie> {
     @Override
     protected EntityManager getEntityManager() {
         return em;
+    }
+    
+    //===========ENCONTRAR LAS CATEGORIAS DE UNA SERIE
+    
+    @GET
+    @Path("categoriasByIdSerieIntermedio/{idSerie}")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public List<Categoria> findCategoriasByIdSerie (@PathParam("idSerie") String idSerie){
+        List<Categoria> listaCategorias;
+        Query q = this.em.createQuery("SELECT c FROM Categoria c WHERE c.idCategoria IN (SELECT cs.categoriaidCategoria FROM Categoriaserie cs WHERE cs.serieidSerie = :idSerie)");
+        q.setParameter("idSerie", idSerie);
+        try{
+            listaCategorias = (List<Categoria>) q.getResultList();
+        }catch (NoResultException e){
+            listaCategorias = null;
+        }
+        
+        return listaCategorias;
     }
     
 }
