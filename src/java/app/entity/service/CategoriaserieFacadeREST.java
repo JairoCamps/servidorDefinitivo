@@ -7,6 +7,7 @@ package app.entity.service;
 
 import app.entity.Categoria;
 import app.entity.Categoriaserie;
+import app.entity.Serie;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -98,7 +99,7 @@ public class CategoriaserieFacadeREST extends AbstractFacade<Categoriaserie> {
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public List<Categoria> findCategoriasByIdSerieIntermedio(@PathParam("idSerie") Integer idSerie){
         List<Categoria> listaCategorias;
-        Query q = this.em.createQuery("SELECT c FROM Categoria c WHERE c.idCategoria IN (SELECT cs.categoriaidCategoria FROM Categoriaserie cs WHERE cs.serieidSerie = :idSerie)");
+        Query q = this.em.createQuery("SELECT cs.categoriaidCategoria FROM Categoriaserie cs WHERE cs.serieidSerie.idSerie = :idSerie");
         q.setParameter("idSerie", idSerie);
         try{
             listaCategorias = (List<Categoria>) q.getResultList();
@@ -107,6 +108,23 @@ public class CategoriaserieFacadeREST extends AbstractFacade<Categoriaserie> {
         }
         
         return listaCategorias;
+    }
+    
+    //=============ENCONTRAR LAS SERIES DE UNA CATEGORIA
+    @GET
+    @Path("seriesByIdCategoriaIntermedio/{idCategoria}")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public List<Serie> findSeriesByIdCategoriaIntermedio(@PathParam("idCategoria") Integer idCategoria){
+        List<Serie> listaSeries;
+        Query q = this.em.createQuery("SELECT cs.serieidSerie FROM Categoriaserie cs WHERE cs.categoriaidCategoria.idCategoria = :idCategoria");
+        q.setParameter("idCategoria", idCategoria);
+        try{
+            listaSeries = (List<Serie>) q.getResultList();
+        }catch (NoResultException e){
+            listaSeries = null;
+        }
+        
+        return listaSeries;
     }
     
 }
