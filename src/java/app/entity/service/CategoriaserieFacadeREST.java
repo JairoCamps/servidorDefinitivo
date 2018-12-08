@@ -96,7 +96,7 @@ public class CategoriaserieFacadeREST extends AbstractFacade<Categoriaserie> {
     @GET
     @Path("categoriasByIdSerieIntermedio/{idSerie}")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public List<Categoria> findCategoriasByIdSerie (@PathParam("idSerie") String idSerie){
+    public List<Categoria> findCategoriasByIdSerieIntermedio(@PathParam("idSerie") Integer idSerie){
         List<Categoria> listaCategorias;
         Query q = this.em.createQuery("SELECT c FROM Categoria c WHERE c.idCategoria IN (SELECT cs.categoriaidCategoria FROM Categoriaserie cs WHERE cs.serieidSerie = :idSerie)");
         q.setParameter("idSerie", idSerie);
