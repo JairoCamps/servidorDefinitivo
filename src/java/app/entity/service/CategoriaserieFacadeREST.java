@@ -126,5 +126,22 @@ public class CategoriaserieFacadeREST extends AbstractFacade<Categoriaserie> {
         
         return listaSeries;
     }
+    //===========ENCONTRAR LAS CATEGORIASERIE DE ESA SERIE
+    
+    @GET
+    @Path("intermediaByIdSerie/{idSerie}")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public List<Categoriaserie> findIntermediaByIdSerie(@PathParam("idSerie") Integer idSerie){
+        List<Categoriaserie> listaCs;
+        Query q = this.em.createQuery("SELECT cs FROM Categoriaserie cs WHERE cs.serieidSerie.idSerie = :idSerie");
+        q.setParameter("idSerie", idSerie);
+        try{
+            listaCs = (List<Categoriaserie>) q.getResultList();
+        }catch (NoResultException e){
+            listaCs = null;
+        }
+        
+        return listaCs;
+    }
     
 }

@@ -6,10 +6,13 @@
 package app.entity.service;
 
 import app.entity.Categoria;
+import app.entity.Serie;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -101,6 +104,94 @@ public class CategoriaFacadeREST extends AbstractFacade<Categoria> {
         }catch (Exception e){
             System.out.println(e.getMessage());
         }
+        return c;
+    }
+    
+    //Servicio para encontrar una categoria por nombre
+    @POST
+    @Path("findCategoriaByName/{nombre}")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Categoria findCategoriaByNombre(@PathParam("nombre") String nombre){
+        Categoria c = null;
+        Query q = em.createNamedQuery("Categoria.findByNombre");
+        q.setParameter("nombre", nombre);
+        try{
+            c = (Categoria) q.getSingleResult();
+        }catch(Exception e){e.getMessage();}
+        
+        return c;
+    }
+    
+    //Servicio para encontrar el id de una categoria por nombre
+    @POST
+    @Path("findIdCategoriaByName/{nombre}")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Integer findIdCategoriaByNombre(@PathParam("nombre") String nombre){
+        Categoria c = null;
+        Query q = em.createNamedQuery("Categoria.findByNombre");
+        q.setParameter("nombre", nombre);
+        try{
+            c = (Categoria) q.getSingleResult();
+        }catch(NoResultException e){return null;}
+        
+        return c.getIdCategoria();
+    }
+    
+    //Servicio para encontrar las listas asociadas a una categoria por nombre
+    @POST
+    @Path("findSeriesByCategoriaName/{nombre}")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public List<Serie> findSeriesByCategoriaName(@PathParam("nombre") String nombre){
+        Categoria categoria = findCategoriaByNombre(nombre);
+        
+        Query q = em.createQuery("SELECT s FROM Serie s JOIN s.categoriaserieCollection csc, csc.categoriaidCategoria c WHERE c.idCategoria = :idCategoria ORDER BY s.fecha ASC");
+        q.setParameter("idCategoria",categoria.getIdCategoria());
+        
+        return q.getResultList();
+    }
+    
+    //Servicio para borrar la categoria por el nombre
+    @POST
+    @Path("deleteCategoriaByName/{nombre}")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Boolean deleteCategoriaByName(@PathParam("nombre") String nombre){
+        try{
+            Categoria c = findCategoriaByNombre(nombre);
+            remove(c);
+        }catch(Exception e){return false;}
+        
+        return true;
+    }
+    
+    //Servicio que devuelve una lista de categorias ordenadas por orden
+    @POST
+    @Path("selectCategoriaOrdenado")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public List<Categoria> selectCategoriaOrdenado(){
+        Query q = em.createQuery("SELECT c FROM Categoria c ORDER BY c.nombre ASC");
+        
+        return q.getResultList();
+    }
+    
+    //Servicio para buscar categoria por idSerie
+    @POST
+    @Path("selectCategoriaByIdSerie/{id}")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public List<Categoria> selectCategoriaByIdSerie(@PathParam("id") Integer id){
+        Query q = em.createQuery("SELECT c FROM Categoria c JOIN c.categoriaserieCollection csc, csc.serieidSerie s WHERE s.idSerie = :id");
+        q.setParameter("id", id);
+        return q.getResultList();
+    }
+    
+    //Servicio para buscar una categoria por idCategoria
+    @POST
+    @Path("findCategoriaByIdCategoria/{id}")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Categoria findCategoriaByIdCategoria(@PathParam("id") Integer id){
+        Query q = em.createQuery("SELECT c FROM Categoria c WHERE c.idCategoria = :id");
+        q.setParameter("id", id);
+        
+        Categoria c = (Categoria) q.getSingleResult();
         return c;
     }
     

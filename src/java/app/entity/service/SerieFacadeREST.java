@@ -144,6 +144,45 @@ public class SerieFacadeREST extends AbstractFacade<Serie> {
         return listaCategorias;
     }
     
+    //Servicio para encontrar las series por nombre 
+   @GET
+   @Path("findSeriesByNombre/{nombre}")
+   @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+   public List<Serie> findSeriesByNombre (@PathParam("nombre") String nombre){
+        List<Serie> listaSeries;
+        Query q = this.em.createQuery("SELECT s FROM Serie s WHERE s.nombre LIKE :nombre ORDER BY s.fecha ASC");
+        q.setParameter("nombre", nombre);
+        try{
+            listaSeries = q.getResultList();
+        }catch (NoResultException e){
+            listaSeries = null;
+        }
+        
+        return listaSeries;
+    }
+   
+   //Servicio para encontrar una serie por Id Serie
+   @GET
+   @Path("findSerieByIdSerie/{id}")
+   @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+   public Serie findSerieByIdSerie (@PathParam("id") Integer id){
+        Serie serie;
+        Query q = em.createNamedQuery("Serie.findByIdSerie", Serie.class);
+        q.setParameter("idSerie", id);
+        
+        serie = (Serie) q.getSingleResult();
+        return serie;
+    }
+   
+   //Servicio para eliminar una serie por Id Serie
+   @GET
+   @Path("deleteSerieByIdSerie/{id}")
+   @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+   public void deleteSerieByIdSerie (@PathParam("id") Integer id){
+        Serie serie = find(id);
+        this.remove(serie);
+    }
+    
    
     
 }
